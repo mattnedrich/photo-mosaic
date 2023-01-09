@@ -134,3 +134,4 @@ dmypy.json
 photo-library-builder/config.json
 config.json
 .DS_Store
+output/*

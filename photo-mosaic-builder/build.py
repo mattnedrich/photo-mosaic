@@ -123,10 +123,10 @@ def run():
   # crop target image into appropriate size
   img_data = prepare_mosaic(source_path, tile_size)
 
-  with open('index.json') as f:
+  with open('output/index.json') as f:
     library = json.load(f, object_hook=handle_int64_strings)
   mosaic = build_mosaic(img_data, tile_size, cell_bins, library)
-  mosaic.save('out.png')
+  mosaic.save('output/out.png')
 
 if __name__ == '__main__':
   run()

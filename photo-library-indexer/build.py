@@ -52,7 +52,7 @@ def run():
     library.append(result)
 
     # todo: write index.json to some gitignored output directory
-    with open('index.json', 'w') as f:
+    with open('output/index.json', 'w') as f:
       json.dump(library, f, default=str)
 
 if __name__ == '__main__':
