@@ -15,7 +15,6 @@ def run():
   files = [f for f in listdir(CONFIG['photoPath']) if isfile(join(CONFIG['photoPath'], f)) and f.endswith('.jpeg')]
   for f in files:
     img_path = os.path.join(CONFIG['photoPath'], f)
-    # face_detection(img_path)
     crop(img_path, CONFIG['tilePath'], TILE_SIZE)
 
 if __name__ == "__main__":

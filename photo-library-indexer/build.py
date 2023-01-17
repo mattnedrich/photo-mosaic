@@ -41,7 +41,7 @@ def run():
 
   tiles = [f for f in os.listdir(TILE_PATH) if os.path.isfile(os.path.join(CONFIG['photoPath'], f)) and f.endswith('.jpeg')]
   library = []
-  for tile in tiles:
+  for idx, tile in enumerate(tiles):
     img_path = os.path.join(TILE_PATH, tile)
     img = Image.open(img_path)
     img.load()
@@ -50,10 +50,11 @@ def run():
     result['path'] = img_path
     result = {**result, **get_image_color_distribution(img, CONFIG)}
     library.append(result)
+    if idx % 100 == 0:
+      print(f'completed {idx} of {len(tiles)}')
 
-    # todo: write index.json to some gitignored output directory
-    with open('output/index.json', 'w') as f:
-      json.dump(library, f, default=str)
+  with open('output/index.json', 'w') as f:
+    json.dump(library, f, default=str)
 
 if __name__ == '__main__':
   run()
