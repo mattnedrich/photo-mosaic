@@ -7,6 +7,7 @@ import shutil
 
 import numpy as np
 from PIL import Image
+from PIL import ImageChops
 from scipy.optimize import linear_sum_assignment
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -140,6 +141,20 @@ def build_mosaic(data, tile_size, cell_bins, library, num_repeats, repeat_penalt
   else:
     return mosaic_output
 
+
+def compute_error_summary(output_dir, mosaic_img, src_img):
+  if src_img.mode == 'RGBA':
+    src_img = Image.alpha_composite(Image.new('RGBA', src_img.size, (255, 255, 255)), src_img).convert('RGB')
+  diff = ImageChops.difference(mosaic_img, src_img)
+  np_src = np.asarray(src_img)
+  np_diff = np.asarray(diff)
+
+  error = np_diff.sum() / np_src.sum()
+
+  with open(f'{output_dir}/error.txt', 'w') as f:
+   f.write(str(error))
+
+
 def prepare_mosaic(source_path, tile_size):
   img = Image.open(source_path)
   img.load()
@@ -166,6 +181,9 @@ def handle_int64_strings(obj):
   new_obj['blue'] = [int(val) for val in obj['blue']]
   return new_obj
 
+def copy_config_to_output(output_dir):
+  shutil.copyfile('config.json', f'output/{output_dir}/config.json')
+
 def run_one_image(source_path, CONFIG):
   tile_size = CONFIG['tileSizeInPixels']
   cell_bins = CONFIG['binsPerTile']
@@ -181,11 +199,19 @@ def run_one_image(source_path, CONFIG):
   mosaic = build_mosaic(img_data, tile_size, cell_bins, library, num_repeats, repeat_penalty, blend_with_source, blend_ratio, src_img)
   epoch_time = int(time.time())
   source_filename = os.path.basename(source_path).split('.')[0]
-  output_dir = f'{source_filename}-{epoch_time}'
 
+  # build output directory
+  output_dir = f'{source_filename}-{epoch_time}'
   os.makedirs(f'output/{output_dir}')
+
+  # write final mosaic image
   mosaic.save(f'output/{output_dir}/mosaic.png')
-  shutil.copyfile('config.json', f'output/{output_dir}/config.json')
+
+  # write config used to build the mosiac 
+  copy_config_to_output(output_dir)
+
+  # write error summary
+  compute_error_summary(f'output/{output_dir}', mosaic, src_img)
 
 def run():
   CONFIG = get_config()
